@@ -120,8 +120,8 @@ $STEPS = [
             $_POST["collate"],
 
             $CONFIG["web_title"],
-            $uri,
-            "$uri$CONFIG[admin_path]/",
+            sanitizeUrl($uri) . "/",
+            sanitizeUrl($uri . $CONFIG["admin_path"]) . "/",
             randomHash(),
             date_default_timezone_get(),
             $CONFIG["i18n"],
