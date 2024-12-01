@@ -102,6 +102,43 @@ function get_uri (): string {
     return rtrim($location, "//") . "/";
 }
 
+function sanitizeUrl ($url) {
+    // Check if URL is empty
+    if (empty($url)) return null;
+
+    // Determine the default protocol (HTTP or HTTPS)
+    if (strpos($url, 'https://') === 0)
+        $defaultProtocol = 'https://'; // Use HTTPS if URL has it
+    else
+        $defaultProtocol = 'http://'; // Default protocol
+
+    // Remove the protocol from the URL for sanitization
+    $urlWithoutProtocol = preg_replace('/^https?:\/\//', '', $url);
+
+    // Get the domain part
+    $domain = strtok($urlWithoutProtocol, '/'); // Get the first part as domain
+    $path = substr($urlWithoutProtocol, strlen($domain)); // Get the rest as path
+
+    // Handle '.' and '..' in the path
+    $parts = explode('/', $path);
+    $sanitizedParts = [];
+
+    foreach ($parts as $part) {
+        if ($part === '' || $part === '.') {
+            continue; // Skip empty parts and '.'
+        } elseif ($part === '..') {
+            array_pop($sanitizedParts); // Remove last element if exists
+        } else {
+            $sanitizedParts[] = $part; // Add valid part
+        }
+    }
+
+    // Reconstruct the URL with the appropriate protocol and domain
+    $sanitizedUrl = $defaultProtocol . $domain . '/' . implode('/', $sanitizedParts);
+
+    return rtrim($sanitizedUrl, '/'); // Remove trailing slash if any
+}
+
 function error (string $string) {
     global $I18n;
     echo "<div style='display:flex;justify-content: center;margin-top: 10px'><div style='width: 80%;height: 80px;background: whitesmoke;border-radius: 0 8px 8px 0;font-family: system-ui;font-weight: bolder;display: flex;align-items: center;padding: 0 10px;box-sizing: border-box;border-" . ($I18n['$dir'] == "ltr" ? "left: 5px solid red;" : "right: 5px solid red;") . "font-size: 18px'>" . i18n($string) . "</div></div>";
